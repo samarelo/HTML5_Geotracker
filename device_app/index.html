@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<head>
+<title>GeoTracker (client app)</title>
+<body>
+<!--
+Client apps for GeoTracker:
+
+Purpose: Runs on device that person wishes to use as tracking device.
+
+(1)Uses HTML5 Geolocation API to capture GPS.
+(2)When there is an update on Geolocation, it sends coords to WebSocket Server
+Optional(3) displays map in realtime.
+
+Problems: 
+How to determine when device has data connection?
+A: Can I use the WebSocket connection to identify connection?
+- If now WebSocket connection, assume no data connection
+
+What to do when there is no data connection?
+A: store coords locally in DOM then post to WebSocket Server once data connection is established.	
+
+
+ -->
+<span id="btn_enable" class="button">Enable Tracking</span>
+<span id="btn_disable" class="button">Disable Tracking</span>
+<span id="status_data" class="status">Data Connection Status (online/offine)</span>
+<div id="output_coords" style="display:none;"></div>
+<script type="text/javascript">
+	// used to track if there is a data connection
+	var _dataOn = false;
+	var _watchID;
+	// used to hold current coords (JSON form)
+	var _curCoordsJSON;
+	
+	// starts eventlistener to get Geolocation updates
+	function startTracking(){
+		_watchID=navigator.geolocation.watchPosition(onLocationUpdate, handleError);
+	}
+
+	// stops eventlistener for Geolocation updates
+	function stopTracking(){
+		navigator.geolocation.clearWatch(_watchID);
+	}
+
+	// callback function to handle when there is a Geolocation update
+	function onLocationUpdate(position){
+	// need to determine if this is an actual update or just same location
+		if (_curCoordsJSON){
+			if (_curCoordsJSON.lat!=position.coords.latitude && _curCoordsJSON.long!=position.coords.longitude) {
+				updateCoords(position.coords.latitude,position.coords.longitude);
+				//send new coords to WebSocket Server
+				wsSendCoords(_curCoordsJSON);
+			} 
+		) else {
+			updateCoords(position.coords.latitude,position.coords.longitude);
+
+		}
+	}
+	
+	// update current coords
+	function updateCoords(newlat,newlong){
+		_curCoordsJSON={lat:newlat,long:newlong};
+	}
+
+
+/**
+	WebSocket Functions
+*/
+
+	// function to start WebSOcket connection
+	var _WSHOST_="";
+	var _WSPORT_=8000;
+	var _ws;	
+	// tracks state of dsta connection
+	var _wsConnected=false;
+	// tracks if there are pending offline updates
+	var _pendingUpdates=false;
+	
+	// array to hold pendingUpdates
+	var _pendingCoords=[];
+	fucntion wsConnect(){
+		ws = new WebSocket("ws://"+_WSHOST_+":"+_WSPORT_);
+		// when ws connection is opened
+		ws.onopen = function (){
+			console.log("ws established");
+			_wsConnected=true;
+		}
+
+		// when ws connection is closed
+		ws.onclose = function(event){
+			console.log("ws closed");
+			_wsConnected=false;
+		}
+	}
+	
+	// function to senddata
+	fucntion wsSendCoords(coordsJSON){
+		// Check if there is a data connection
+		// if no data connection store in DOM
+		// if data connection push to WebSocket
+
+		if(_wsConnected){
+			ws.send({type:"update",coords:coordsJSON});
+		} else {
+			console.log("offine update: pushed to pending list");
+			_pendingCoords.push(coordsJSON);
+		}
+		
+
+
+	}
+</script>
+</body>
+</head>
+</html>
