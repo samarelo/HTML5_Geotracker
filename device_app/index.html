@@ -23,7 +23,7 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
  -->
 <span id="btn_enable" class="button" onclick="startTracking()">Enable Tracking</span>
 <span id="btn_disable" class="button" onclick="stopTracking()">Disable Tracking</span>
-<span id="status_data" class="status">Data Connection Status (online/offine)</span>
+<span id="status_data" class="status" onclick="wsConnect()">Data Connection Status (online/offine)</span>
 <div id="output_coords" style="display:none;"></div>
 <script type="text/javascript">
 	// used to track if there is a data connection
@@ -43,7 +43,7 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 	}
 
 	// function to handleError 
-	function handleerror(error){
+	function handleError(error){
 		alert("error encountered:\n"+error);
 		console.log(error);
 	}
