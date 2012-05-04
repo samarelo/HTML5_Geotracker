@@ -21,8 +21,8 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 
 
  -->
-<span id="btn_enable" class="button">Enable Tracking</span>
-<span id="btn_disable" class="button">Disable Tracking</span>
+<span id="btn_enable" class="button" onclick="startTracking()">Enable Tracking</span>
+<span id="btn_disable" class="button" onclick="stopTracking()">Disable Tracking</span>
 <span id="status_data" class="status">Data Connection Status (online/offine)</span>
 <div id="output_coords" style="display:none;"></div>
 <script type="text/javascript">
@@ -59,6 +59,7 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 	
 	// update current coords
 	function updateCoords(newlat,newlong){
+		console.log("Update: Lat="+newlat+" Long="+newlong);
 		_curCoordsJSON={lat:newlat,long:newlong};
 	}
 
