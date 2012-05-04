@@ -26,7 +26,7 @@ var wss = new WebSocketServer({host:_HOST_,port:_PORT_});
 /* Global variables */
 var _trackingOn = false; // bool to track is client is online
 var _viewerWS =[]; // holds all websockets of viewers
-var _clientWS =; // holds websocket of client (being tracked)
+var _clientWS = null; // holds websocket of client (being tracked)
 
 
 /* JSON message Definitions 
@@ -44,7 +44,7 @@ When receiving a batch of geolocation updates from client once client comes back
 
 */
 
-wws.on("connection", function(ws){
+wss.on("connection", function(ws){
 	ws.on("message", function(msgJSON){
 		switch (msgJSON.type){
 			case "connect":
