@@ -42,6 +42,12 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 		navigator.geolocation.clearWatch(_watchID);
 	}
 
+	// function to handleError 
+	function handleerror(error){
+		alert("error encountered:\n"+error);
+		console.log(error);
+	}
+	
 	// callback function to handle when there is a Geolocation update
 	function onLocationUpdate(position){
 	// need to determine if this is an actual update or just same location
@@ -50,10 +56,10 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 				updateCoords(position.coords.latitude,position.coords.longitude);
 				//send new coords to WebSocket Server
 				wsSendCoords(_curCoordsJSON);
-			} 
-		) else {
+			}
+	
+		} else {
 			updateCoords(position.coords.latitude,position.coords.longitude);
-
 		}
 	}
 	
@@ -79,7 +85,7 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 	
 	// array to hold pendingUpdates
 	var _pendingCoords=[];
-	fucntion wsConnect(){
+	function wsConnect(){
 		ws = new WebSocket("ws://"+_WSHOST_+":"+_WSPORT_);
 		// when ws connection is opened
 		ws.onopen = function (){
@@ -95,7 +101,7 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 	}
 	
 	// function to senddata
-	fucntion wsSendCoords(coordsJSON){
+	function wsSendCoords(coordsJSON){
 		// Check if there is a data connection
 		// if no data connection store in DOM
 		// if data connection push to WebSocket
