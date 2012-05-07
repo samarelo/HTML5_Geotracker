@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <head>
 <title>GeoTracker (client app)</title>
-<script type="https://maps.googleapis.com/amps/api/js?sensor=false"></script>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<style type="text/css">
+	html {height:100%}
+	body {height:100%; margin:0; padding:0}
+	#map_canvas {height:80%}
+</style>
+
 </head>
 <body onload="initGMap()">
 <!--
@@ -62,7 +69,9 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 				updateCoords(position.coords.latitude,position.coords.longitude,new Date().getTime());
 			}
 		} else {
-			updateCoords(position.coords.latitude,position.coords.longitude);
+			mapSetup(position.coords.latitude,position.coords.longitude);
+			updateCoords(position.coords.latitude,position.coords.longitude,new Date().getTime());
+			
 		}
 	}
 	
@@ -122,13 +131,57 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 			_pendingCoords.push(coordsJSON);
 			console.log("# of updates pending: "+_pendingCoords.length);
 		}
+		updateMap(coordsJSON.lat,coordsJSON.long,coordsJSON.timestamp);
 	}
 </script>
 <div id="map_canvas"><
 
 </div>
 <script type="text/javascript">
+var firstUpdate=true;
+var poly; //holds polylines
+var map; //holds map
 
+function initGMap(){
+//
+}
+
+function mapSetup(lat,long){
+	console.log("setting up map");
+	var firstLoc = new google.maps.LatLng(lat,long);
+	var myOptions = {
+		zoom: 13,
+		center: firstLoc,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+
+	map = new google.maps.Map(document.getElementById("map_canvas"),myOptions);
+
+	var polyOptions = {
+		strokeColor: "#000000",
+		strokeOpacity: 1.0,
+		stroekWeight: 3
+	}
+	poly = new google.maps.Polyline(polyOptions);
+	poly.setMap(map);
+}	
+
+  
+
+function updateMap(lat,long,tstamp){
+	console.log("Updating Map");
+	var path = poly.getPath();
+	
+	var pos = new google.maps.LatLng(lat,long);
+	path.push(pos);
+	var d = new Date(tstamp);
+	var marker = new google.maps.Marker({
+		position:pos,
+		title:d.toDateString(),
+		map:map
+	});
+	console.log("Map Updated: added new marker");
+}
 </script>
 </body>
 </head>
