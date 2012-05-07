@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <head>
 <title>GeoTracker (client app)</title>
-<body>
+<script type="https://maps.googleapis.com/amps/api/js?sensor=false"></script>
+</head>
+<body onload="initGMap()">
 <!--
 Client apps for GeoTracker:
 
@@ -35,12 +37,15 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 	// starts eventlistener to get Geolocation updates
 	function startTracking(){
 		_watchID=navigator.geolocation.watchPosition(onLocationUpdate, handleError);
+		console.log("Tracking: Enabled");
 	}
 
 	// stops eventlistener for Geolocation updates
 	function stopTracking(){
 		navigator.geolocation.clearWatch(_watchID);
+		console.log("Tracking: Disabled");
 	}
+
 
 	// function to handleError 
 	function handleError(error){
@@ -51,22 +56,22 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 	// callback function to handle when there is a Geolocation update
 	function onLocationUpdate(position){
 	// need to determine if this is an actual update or just same location
+		console.log("Tracker Location Update found...checking if it's a new location");
 		if (_curCoordsJSON){
 			if (_curCoordsJSON.lat!=position.coords.latitude && _curCoordsJSON.long!=position.coords.longitude) {
-				updateCoords(position.coords.latitude,position.coords.longitude);
-				//send new coords to WebSocket Server
-				wsSendCoords(_curCoordsJSON);
+				updateCoords(position.coords.latitude,position.coords.longitude,new Date().getTime());
 			}
-	
 		} else {
 			updateCoords(position.coords.latitude,position.coords.longitude);
 		}
 	}
 	
 	// update current coords
-	function updateCoords(newlat,newlong){
+	function updateCoords(newlat,newlong,tstamp){
 		console.log("Update: Lat="+newlat+" Long="+newlong);
-		_curCoordsJSON={lat:newlat,long:newlong};
+		_curCoordsJSON={lat:newlat,long:newlong,timestamp:tstamp};
+		//send new coords to WebSocket Server
+		wsSendCoords(_curCoordsJSON);
 	}
 
 
@@ -91,13 +96,15 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 		ws.onopen = function (){
 			console.log("ws established");
 			_wsConnected=true;
-		}
+			// tell ws i'm a client (tracker)
+			ws.send(JSON.stringify({type:"connect",peerType:"client"})); 
+		};
 
 		// when ws connection is closed
 		ws.onclose = function(event){
 			console.log("ws closed");
 			_wsConnected=false;
-		}
+		};
 	}
 	
 	// function to senddata
@@ -107,15 +114,21 @@ A: store coords locally in DOM then post to WebSocket Server once data connectio
 		// if data connection push to WebSocket
 
 		if(_wsConnected){
-			ws.send({type:"update",coords:coordsJSON});
+			var JSONobj = {type:"update",coords:coordsJSON};
+			console.log("Send Update to Server:"+JSON.stringify(JSONobj));
+			ws.send(JSON.stringify(JSONobj));
 		} else {
-			console.log("offine update: pushed to pending list");
+			console.log("Offine. Push update to pending list");
 			_pendingCoords.push(coordsJSON);
+			console.log("# of updates pending: "+_pendingCoords.length);
 		}
-		
-
-
 	}
+</script>
+<div id="map_canvas"><
+
+</div>
+<script type="text/javascript">
+
 </script>
 </body>
 </head>
