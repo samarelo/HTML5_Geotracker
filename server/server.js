@@ -32,7 +32,7 @@ var _clientWS = null; // holds websocket of client (being tracked)
 /* JSON message Definitions 
 On connection to determine ws type
 	type: "connect"
-	peer-type: "client" or "viewer"
+	peerType: "client" or "viewer"
 
 When receiving geolocation update from client
 	type: "update"
@@ -45,11 +45,15 @@ When receiving a batch of geolocation updates from client once client comes back
 */
 
 wss.on("connection", function(ws){
-	ws.on("message", function(msgJSON){
+	console.log("Connection Made");
+	ws.on("message", function(JSONstr){
+		console.log("message is: "+JSONstr);
+		msgJSON = JSON.parse(JSONstr);
+		console.log("Message Received Type: "+msgJSON.type);
 		switch (msgJSON.type){
 			case "connect":
 				// determine if it's a client or viewer
-				if (msgJSON.peer-type == "client"){
+				if (msgJSON.peerType == "client"){
 					_clientWS = ws;
 					_trackingOn = true;
 					console.log("Connected: client");
