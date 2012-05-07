@@ -57,6 +57,7 @@ wss.on("connection", function(ws){
 					_clientWS = ws;
 					_trackingOn = true;
 					console.log("Connected: client");
+					console.log("Tracking: Enabled");
 				} else {
 					_viewerWS.push(ws);
 					console.log("Connection: viewer");
@@ -65,7 +66,7 @@ wss.on("connection", function(ws){
 
 			case "update":
 				/* for testing output the coords */
-				console.log("Update: Latitude="+(msgJSON.coords).lat+" Longitude="+(msgJSON.coords).long);
+				console.log("Update: Latitude="+(msgJSON.coords).lat+" Longitude="+(msgJSON.coords).long+" TimeStamp="+(msgJSON.coords).timestamp);
 				break;
 
 			case "update-batch":
@@ -84,10 +85,12 @@ wss.on("connection", function(ws){
 			// it's a client that closed
 			_clientWS = null;
 			_trackingOn = false;
+			console.log("Disconnected: client");
+			console.log("Tracking: Disabled");
 		} else {
 			_viewerWS.splice(i,1);
+			console.log("Disconnected: viewer");
+			console.log("# of viewers: "+_viewerWS.length);
 		}
-
 	});
-
 });
